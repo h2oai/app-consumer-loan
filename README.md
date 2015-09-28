@@ -65,33 +65,25 @@ $ ./gradlew jettyRunWar
 Make a prediction with curl and get a JSON response.
 
 ```
-$ curl "http://localhost:8080/predict?pclass=1&sex=male&age=25&fare=1"
+$ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=VERIFIED+-+income&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10"
 {
-  labelIndex : 0,
-  label : "0",
+  // Bad loan prediction.
+  "labelIndex" : 0,
+  "label" : "0",
   "classProbabilities" : [
-    0.684132522471987,
-    0.3158674775280131
-  ]
+    0.8684845397547953,
+    0.13151546024520466
+  ],
+
+  // If the loan is offered (not predicted bad), the interest rate.
+  interestRate : 12.441467160517762
 }
 ```
 
 ```
-$ curl "http://localhost:8080/predict?pclass=3&sex=male&age=40&fare=1000"
-{
-  labelIndex : 0,
-  label : "0",
-  "classProbabilities" : [
-    0.8946904250568489,
-    0.10530957494315105
-  ]
-}
-```
-
-```
-$ curl "http://localhost:8080/predict?pclass=3&sex=junk&age=40&fare=1000"
+$ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=blahblah&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10"
 [... HTTP error response simplified below ...]
-Error 406 Unknown categorical level (sex,junk)
+Unknown categorical level (verification_status,blahblah)
 ```
 
 ## References
