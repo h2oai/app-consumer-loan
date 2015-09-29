@@ -56,7 +56,6 @@ public class PredictServlet extends HttpServlet {
       // Build a JSON response for the prediction.
       StringBuilder sb = new StringBuilder();
       sb.append("{\n");
-      sb.append("  // Bad loan prediction.\n");
       sb.append("  \"labelIndex\" : ").append(p.labelIndex).append(",\n");
       sb.append("  \"label\" : \"").append(p.label).append("\",\n");
       sb.append("  \"classProbabilities\" : ").append("[\n");
@@ -77,8 +76,7 @@ public class PredictServlet extends HttpServlet {
       }
       sb.append("  ],\n");
       sb.append("\n");
-      sb.append("  // If the loan is offered (not predicted bad), the interest rate.\n");
-      sb.append("  interestRate : " + p2.value + "\n");
+      sb.append("  \"interestRate\" : " + p2.value + "\n");
       sb.append("}\n");
 
       // Emit the prediction to the servlet response.
