@@ -18,9 +18,9 @@ $(document).ready(function(){
       .done(function(data){
         console.log(data);
         if(data.label === '1') {
-          $response.text(data.interestRate.toFixed(2) + '%');
-        } else {
           $response.text('Declined!');
+        } else {
+          $response.text(data.interestRate.toFixed(2) + '%');
         }
       })
       .fail(function(error){
