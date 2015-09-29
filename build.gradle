@@ -24,6 +24,3 @@ war {
 }
 jettyRunWar.contextPath = ''
 
-stopKey = 'foo'
-stopPort = 9451
-httpPort = 8000
