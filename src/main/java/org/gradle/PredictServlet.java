@@ -52,6 +52,7 @@ public class PredictServlet extends HttpServlet {
       RegressionModelPrediction p2 = predictRate(row);
 
       System.out.println("p[1]: " + p.classProbabilities[1]);
+      System.out.println("p2  : " + p2.value);
 
       // Build a JSON response for the prediction.
       StringBuilder sb = new StringBuilder();
