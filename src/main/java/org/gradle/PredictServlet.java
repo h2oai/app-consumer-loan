@@ -11,78 +11,93 @@ import hex.genmodel.easy.prediction.RegressionModelPrediction;
 import hex.genmodel.easy.*;
 
 public class PredictServlet extends HttpServlet {
-  private BinomialModelPrediction predictBad (RowData row) throws Exception {
-    // Potential improvement for performance by not instantiating a new model every time.
-    BadLoanModel rawModel = new BadLoanModel();
-    EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
+  // Set to true for a nice demo.
+  // Set to false to get better throughput.
+  static final boolean VERBOSE = true;
 
-    // Make the prediction.
-    return model.predictBinomial(row);
+  static BadLoanModel rawBadLoanModel;
+  static EasyPredictModelWrapper badLoanModel;
+
+  static InterestRateModel rawInterestRateModel;
+  static EasyPredictModelWrapper interestRateModel;
+
+  static {
+    rawBadLoanModel = new BadLoanModel();
+    badLoanModel = new EasyPredictModelWrapper(rawBadLoanModel);
+
+    rawInterestRateModel = new InterestRateModel();
+    interestRateModel = new EasyPredictModelWrapper(rawInterestRateModel);
   }
 
-  private RegressionModelPrediction predictRate (RowData row) throws Exception {
-    // Potential improvement for performance by not instantiating a new model every time.
-    InterestRateModel rawModel = new InterestRateModel();
-    EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
-
-    // Make the prediction.
-    return model.predictRegression(row);
-  }
-
-  public void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    RowData row = new RowData();
-
-    // Fill RowData with parameter information from the HTTP request.
+  @SuppressWarnings("unchecked")
+  private void fillRowDataFromHttpRequest(HttpServletRequest request, RowData row) {
     Map<String, String[]> parameterMap;
     parameterMap = request.getParameterMap();
-    System.out.println();
+    if (VERBOSE) System.out.println();
     for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
       String key = entry.getKey();
       String[] values = entry.getValue();
       for (String value : values) {
-        System.out.println("Key: " + key + " Value: " + value);
+        if (VERBOSE) System.out.println("Key: " + key + " Value: " + value);
         if (value.length() > 0) {
           row.put(key, value);
         }
       }
     }
+  }
+
+  private BinomialModelPrediction predictBadLoan (RowData row) throws Exception {
+    return badLoanModel.predictBinomial(row);
+  }
+
+  private RegressionModelPrediction predictInterestRate (RowData row) throws Exception {
+    return interestRateModel.predictRegression(row);
+  }
+
+  private String createJsonResponse(BinomialModelPrediction p, RegressionModelPrediction p2) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("{\n");
+    sb.append("  \"labelIndex\" : ").append(p.labelIndex).append(",\n");
+    sb.append("  \"label\" : \"").append(p.label).append("\",\n");
+    sb.append("  \"classProbabilities\" : ").append("[\n");
+    for (int i = 0; i < p.classProbabilities.length; i++) {
+      double d = p.classProbabilities[i];
+      if (Double.isNaN(d)) {
+        throw new RuntimeException("Probability is NaN");
+      }
+      else if (Double.isInfinite(d)) {
+        throw new RuntimeException("Probability is infinite");
+      }
+
+      sb.append("    ").append(d);
+      if (i != (p.classProbabilities.length - 1)) {
+        sb.append(",");
+      }
+      sb.append("\n");
+    }
+    sb.append("  ],\n");
+    sb.append("\n");
+    sb.append("  \"interestRate\" : ").append(p2.value).append("\n");
+    sb.append("}\n");
+
+    return sb.toString();
+  }
+
+  public void doGet (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    RowData row = new RowData();
+    fillRowDataFromHttpRequest(request, row);
 
     try {
-      BinomialModelPrediction p = predictBad(row);
-      RegressionModelPrediction p2 = predictRate(row);
-
-      System.out.println("p[1]: " + p.classProbabilities[1]);
-      System.out.println("p2  : " + p2.value);
-
-      // Build a JSON response for the prediction.
-      StringBuilder sb = new StringBuilder();
-      sb.append("{\n");
-      sb.append("  \"labelIndex\" : ").append(p.labelIndex).append(",\n");
-      sb.append("  \"label\" : \"").append(p.label).append("\",\n");
-      sb.append("  \"classProbabilities\" : ").append("[\n");
-      for (int i = 0; i < p.classProbabilities.length; i++) {
-        double d = p.classProbabilities[i];
-        if (Double.isNaN(d)) {
-          throw new RuntimeException("Probability is NaN");
-        }
-        else if (Double.isInfinite(d)) {
-          throw new RuntimeException("Probability is infinite");
-        }
-
-        sb.append("    ").append(d);
-        if (i != (p.classProbabilities.length - 1)) {
-          sb.append(",");
-        }
-        sb.append("\n");
-      }
-      sb.append("  ],\n");
-      sb.append("\n");
-      sb.append("  \"interestRate\" : " + p2.value + "\n");
-      sb.append("}\n");
+      BinomialModelPrediction p = predictBadLoan(row);
+      RegressionModelPrediction p2 = predictInterestRate(row);
+      String s = createJsonResponse(p, p2);
 
       // Emit the prediction to the servlet response.
-      response.getWriter().write(sb.toString());
+      response.getWriter().write(s);
       response.setStatus(HttpServletResponse.SC_OK);
+
+      if (VERBOSE) System.out.println("prediction(bad loan)     : " + p.classProbabilities[1]);
+      if (VERBOSE) System.out.println("prediction(interest rate): " + p2.value);
     }
     catch (Exception e) {
       // Prediction failed.
@@ -92,14 +107,14 @@ public class PredictServlet extends HttpServlet {
   }
 
   /**
-   * A few simple test cases.
+   * A simple test case.
    */
   public static void main(String[] args) {
     {
       RowData row = new RowData();
       PredictServlet s = new PredictServlet();
       try {
-        BinomialModelPrediction p = s.predictBad(row);
+        BinomialModelPrediction p = s.predictBadLoan(row);
         System.out.println(p.classProbabilities[1]);
       } catch (Exception e) {
         e.printStackTrace();
