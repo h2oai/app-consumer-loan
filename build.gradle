@@ -17,8 +17,6 @@ dependencies {
 }
 
 war {
-    webXml = file('src/someWeb.xml') // copies a file to WEB-INF/web.xml
-    archiveName = "ROOT.war"
 }
 jettyRunWar.contextPath = ''
 
