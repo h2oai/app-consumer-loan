@@ -2,6 +2,8 @@
 
 This example shows a generated Java POJO being called using a REST API from a JavaScript Web application.
 
+The application simulates the experience of a consumer applying for a loan.  The consumer provides some information about themselves and is either offered a loan or denied.
+
 ## Pieces at work
 
 ### Processes
@@ -67,24 +69,105 @@ Make a prediction with curl and get a JSON response.
 ```
 $ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=VERIFIED+-+income&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10"
 {
-  // Bad loan prediction.
   "labelIndex" : 0,
   "label" : "0",
   "classProbabilities" : [
-    0.8684845397547953,
-    0.13151546024520466
+    0.8503840956024278,
+    0.14961590439757225
   ],
 
-  // If the loan is offered (not predicted bad), the interest rate.
-  interestRate : 12.441467160517762
+  "interestRate" : 12.713404063287449
 }
 ```
+
+Notes:
+
+* classProbabilities[1] is .1496.  This is the probability of a bad loan.
+* The threshold is the max-F1 calculated for the model, in this case approximately .18.
+* A label of '1' means the loan is predicted bad.
+* A label of '0' means the loan is not predicted bad.
+* If the loan is not predicted bad, then use the interest rate prediction to suggest an offered rate to the loan applicant.
+
 
 ```
 $ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=blahblah&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10"
 [... HTTP error response simplified below ...]
 Unknown categorical level (verification_status,blahblah)
 ```
+
+## Performance
+
+1.  Set VERBOSE to false in src/main/java/org/gradle/PredictServlet.java
+
+1.  ./gradlew jettyRunWar
+
+1.  Run apachebench as shown here:
+
+```
+$ ab -k -c 8 -n 10000 "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=VERIFIED+-+income&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10"
+This is ApacheBench, Version 2.3 <$Revision: 655654 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+Completed 1000 requests
+Completed 2000 requests
+Completed 3000 requests
+Completed 4000 requests
+Completed 5000 requests
+Completed 6000 requests
+Completed 7000 requests
+Completed 8000 requests
+Completed 9000 requests
+Completed 10000 requests
+Finished 10000 requests
+
+
+Server Software:        Jetty(6.1.25)
+Server Hostname:        localhost
+Server Port:            8080
+
+Document Path:          /predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=VERIFIED+-+income&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10
+Document Length:        160 bytes
+
+Concurrency Level:      8
+Time taken for tests:   3.151 seconds
+Complete requests:      10000
+Failed requests:        0
+Write errors:           0
+Keep-Alive requests:    10000
+Total transferred:      2470247 bytes
+HTML transferred:       1600160 bytes
+Requests per second:    3173.23 [#/sec] (mean)
+Time per request:       2.521 [ms] (mean)
+Time per request:       0.315 [ms] (mean, across all concurrent requests)
+Transfer rate:          765.49 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.0      0       0
+Processing:     0    3  10.5      0      52
+Waiting:        0    3  10.5      0      52
+Total:          0    3  10.5      0      52
+
+Percentage of the requests served within a certain time (ms)
+  50%      0
+  66%      0
+  75%      0
+  80%      0
+  90%      0
+  95%      1
+  98%     51
+  99%     51
+ 100%     52 (longest request)
+```
+
+On a Macbook Pro with a 2.7 GHz Intel Core i7 this run gives:
+
+* throughput of 3173 requests / second
+* latency of 2.52 milliseconds / request
+
+
 
 ## Data
 
