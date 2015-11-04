@@ -11,21 +11,18 @@ import hex.genmodel.easy.prediction.RegressionModelPrediction;
 import hex.genmodel.easy.*;
 
 public class PredictServlet extends HttpServlet {
-  // Set to true for a nice demo.
+  // Set to true for demo mode (to print the predictions to stdout).
   // Set to false to get better throughput.
   static final boolean VERBOSE = true;
 
-  static BadLoanModel rawBadLoanModel;
   static EasyPredictModelWrapper badLoanModel;
-
-  static InterestRateModel rawInterestRateModel;
   static EasyPredictModelWrapper interestRateModel;
 
   static {
-    rawBadLoanModel = new BadLoanModel();
+    BadLoanModel rawBadLoanModel = new BadLoanModel();
     badLoanModel = new EasyPredictModelWrapper(rawBadLoanModel);
 
-    rawInterestRateModel = new InterestRateModel();
+    InterestRateModel rawInterestRateModel = new InterestRateModel();
     interestRateModel = new EasyPredictModelWrapper(rawInterestRateModel);
   }
 
@@ -103,22 +100,6 @@ public class PredictServlet extends HttpServlet {
       // Prediction failed.
       System.out.println(e.getMessage());
       response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
-    }
-  }
-
-  /**
-   * A simple test case.
-   */
-  public static void main(String[] args) {
-    {
-      RowData row = new RowData();
-      PredictServlet s = new PredictServlet();
-      try {
-        BinomialModelPrediction p = s.predictBadLoan(row);
-        System.out.println(p.classProbabilities[1]);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
     }
   }
 }
