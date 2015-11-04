@@ -44,18 +44,19 @@ $ gradle wrapper
 
 <http://h2o-release.s3.amazonaws.com/h2o/rel-slater/5/index.html#R>
 
-##### Step 3: Build the project (Unix only for now).
+##### Step 3: Build the project.
 
 ```
-$ make clean
-$ make
+$ ./gradlew build
 ```
 
 ##### Step 4: Deploy the .war file in a Jetty servlet container.
 
 ```
-$ ./gradlew jettyRunWar
+$ ./gradlew jettyRunWar -x generateModels
 ```
+
+(If you don't include the -x generateModels above, you will build the models again, which is time consuming.)
 
 ##### Step 5: Visit the webapp in a browser.
 
@@ -99,7 +100,7 @@ Unknown categorical level (verification_status,blahblah)
 
 1.  Set VERBOSE to false in src/main/java/org/gradle/PredictServlet.java
 
-1.  ./gradlew jettyRunWar
+1.  ./gradlew jettyRunWar -x war
 
 1.  Run apachebench as shown here:
 

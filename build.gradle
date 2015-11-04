@@ -1,9 +1,9 @@
-apply plugin: 'jetty'
-apply plugin: 'war'
-apply plugin: 'idea'
+apply plugin: "jetty"
+apply plugin: "war"
+apply plugin: "idea"
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.7'
+  gradleVersion = "2.7"
 }
 
 repositories {
@@ -12,11 +12,60 @@ repositories {
 }
 
 dependencies {
-    compile name: 'h2o-genmodel'
+    compile name: "h2o-genmodel"
     compile "javax.servlet:servlet-api:2.5"
 }
 
 war {
+    archiveName = "ROOT.war"
 }
-jettyRunWar.contextPath = ''
+jettyRunWar.contextPath = ""
 
+
+//-------------------------------------------------------------------
+// Custom tasks for generating the model POJOs
+//-------------------------------------------------------------------
+
+task deleteTmp(type: Delete) {
+    delete "tmp"
+}
+
+task runRScript(type: Exec, dependsOn: deleteTmp) {
+    commandLine "R", "-f", "script.R"
+}
+
+task placeGenModelJar(type: Copy, dependsOn: runRScript) {
+    from "tmp/h2o-genmodel.jar"
+    into "lib"
+}
+
+task(placeBadLoanModel, dependsOn: placeGenModelJar) << {
+    String fileContents = new File("tmp/BadLoanModel.java").text
+    File outf = new File ("src/main/java/org/gradle/BadLoanModel.java")
+    outf.write("package org.gradle;\n" + "\n" + fileContents)
+}
+
+task(placeInterestRateModel, dependsOn: placeGenModelJar) << {
+    String fileContents = new File("tmp/InterestRateModel.java").text
+    File outf = new File ("src/main/java/org/gradle/InterestRateModel.java")
+    outf.write("package org.gradle;\n" + "\n" + fileContents)
+}
+
+task(generateModels, dependsOn: [placeBadLoanModel, placeInterestRateModel]) << {
+}
+
+compileJava.dependsOn generateModels
+
+
+//-------------------------------------------------------------------
+// Custom task for cleaning up generated files
+//-------------------------------------------------------------------
+
+task cleanGenerated(type: Delete) {
+    delete "tmp",
+           "lib/h2o-genmodel.jar",
+           "src/main/java/org/gradle/BadLoanModel.java",
+           "src/main/java/org/gradle/InterestRateModel.java"
+}
+
+clean.dependsOn cleanGenerated
