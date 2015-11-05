@@ -73,18 +73,18 @@ $ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_
   "labelIndex" : 0,
   "label" : "0",
   "classProbabilities" : [
-    0.8762380766437048,
-    0.12376192335629524
+    0.8581645524025798,
+    0.14183544759742012
   ],
 
-  "interestRate" : 12.174027172256938
+  "interestRate" : 12.079950220424134
 }
 ```
 
 Notes:
 
-* classProbabilities[1] is .1496.  This is the probability of a bad loan.
-* The threshold is the max-F1 calculated for the model, in this case approximately .18.
+* classProbabilities[1] is .1418.  This is the probability of a bad loan.
+* The threshold is the max-F1 calculated for the model, in this case approximately .20.
 * A label of '1' means the loan is predicted bad.
 * A label of '0' means the loan is not predicted bad.
 * If the loan is not predicted bad, then use the interest rate prediction to suggest an offered rate to the loan applicant.
