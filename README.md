@@ -68,16 +68,16 @@ $ ./gradlew jettyRunWar -x generateModels
 Make a prediction with curl and get a JSON response.
 
 ```
-$ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=VERIFIED+-+income&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10"
+$ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_ownership=RENT&annual_inc=60000&verification_status=verified&purpose=debt_consolidation&addr_state=FL&dti=3&delinq_2yrs=0&revol_util=35&total_acc=4&longest_credit_length=10"
 {
   "labelIndex" : 0,
   "label" : "0",
   "classProbabilities" : [
-    0.8503840956024278,
-    0.14961590439757225
+    0.8762380766437048,
+    0.12376192335629524
   ],
 
-  "interestRate" : 12.713404063287449
+  "interestRate" : 12.174027172256938
 }
 ```
 
