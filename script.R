@@ -8,7 +8,7 @@ print("Import approved and rejected loan requests...")
 loans  <- h2o.importFile(path = "data/loan.csv")
 loans$bad_loan <- as.factor(loans$bad_loan)
 
-rand  <- h2o.runif(loans, seed = 123456)
+rand  <- h2o.runif(loans, seed = 1234567)
 train <- loans[rand$rnd <= 0.8, ]
 valid <- loans[rand$rnd > 0.8, ]
 
