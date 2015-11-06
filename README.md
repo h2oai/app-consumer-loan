@@ -4,6 +4,14 @@ This example shows a generated Java POJO being called using a REST API from a Ja
 
 The application simulates the experience of a consumer applying for a loan.  The consumer provides some information about themselves and is either offered a loan or denied.
 
+
+## H2O World 2015 Presentation
+
+The "Building a Smarter Application" presentation given at H2O World 2015 references this repo.
+
+* <https://github.com/h2oai/h2o-world-2015-training/tree/master/tutorials/building-a-smarter-application>
+
+
 ## Pieces at work
 
 ### Processes
@@ -18,18 +26,23 @@ The application simulates the experience of a consumer applying for a loan.  The
 
 > Note:  Not to be confused with the H2O embedded web port (default 54321) which is also powered by Jetty.
 
+
 ## Files
 
-(Front-end)   
+(Offline)
+* build.gradle
+* data/loan.csv
+* script.R
 
-1.  JavaScript program
+(Front-end)
+* src/main/webapp/index.html
+* src/main/webapp/app.js
 
-(Back-end)   
-
-1.  POJO java code
-1.  genmodel.jar
-1.  Servlet code
-1.  web.xml deployment descriptor
+(Back-end)
+* src/main/java/org/gradle/PredictServlet.java
+* lib/h2o-genmodel.jar (downloaded)
+* src/main/java/org/gradle/BadLoanModel.java (generated)
+* src/main/java/org/gradle/InterestRateModel.java (generated)
 
 
 ## Steps to run
@@ -42,7 +55,7 @@ $ gradle wrapper
 
 ##### Step 2: Install H2O's R package if you don't have it yet.
 
-<http://h2o-release.s3.amazonaws.com/h2o/rel-slater/5/index.html#R>
+<http://h2o-release.s3.amazonaws.com/h2o/rel-tibshirani/2/index.html#R>
 
 ##### Step 3: Build the project.
 
@@ -95,6 +108,7 @@ $ curl "localhost:8080/predict?loan_amnt=10000&term=36+months&emp_length=5&home_
 [... HTTP error response simplified below ...]
 Unknown categorical level (verification_status,blahblah)
 ```
+
 
 ## Performance
 
@@ -169,10 +183,10 @@ On a Macbook Pro with a 2.7 GHz Intel Core i7 this run gives:
 * latency of 2.52 milliseconds / request
 
 
-
 ## Data
 
 The original data can be downloaded at <https://www.lendingclub.com/info/download-data.action> and it is all the data from 2007 to June 30, 2015.  This does not incorporate the declined loan data set which does not have the same feature set.  Note that some munging was done to distill the data to what is in this git repository.
+
 
 ## References
 
