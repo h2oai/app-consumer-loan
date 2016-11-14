@@ -5,7 +5,7 @@ library(h2o)
 h2o.init(nthreads = -1)
 
 print("Import approved and rejected loan requests...")
-loans  <- h2o.importFile(path = "data/loan.csv")
+loans  <- h2o.importFile(path = " data/loan.csv")
 loans$bad_loan <- as.factor(loans$bad_loan)
 
 rand  <- h2o.runif(loans, seed = 1234567)
