@@ -30,11 +30,15 @@ task deleteTmp(type: Delete) {
     delete "tmp"
 }
 
-task runRScript(type: Exec, dependsOn: deleteTmp) {
-    commandLine "R", "-f", "script.R"
+task runScript(type: Exec, dependsOn: deleteTmp) {
+    if (project.hasProperty("usePython") && project.usePython == "true") {
+        commandLine "python", "script.py"
+    } else {
+        commandLine "R", "-f", "script.R"
+    }
 }
 
-task placeGenModelJar(type: Copy, dependsOn: runRScript) {
+task placeGenModelJar(type: Copy, dependsOn: runScript) {
     from "tmp/h2o-genmodel.jar"
     into "lib"
 }

@@ -61,7 +61,8 @@ $ gradle wrapper
 ##### Step 3: Build the project.
 
 ```
-$ ./gradlew build
+$ ./gradlew build                    # Run R script to generate POJOs
+$ ./gradlew build -PusePython=true   # Run Python script to generate POJOs
 ```
 
 ##### Step 4: Deploy the .war file in a Jetty servlet container.
