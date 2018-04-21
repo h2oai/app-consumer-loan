@@ -33,6 +33,7 @@ The "Building a Smarter Application" presentation given at H2O World 2015 refere
 * build.gradle
 * data/loan.csv
 * script.R
+* script.py
 
 (Front-end)
 * src/main/webapp/index.html
